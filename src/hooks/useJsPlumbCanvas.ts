@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type React from 'react';
 import { BrowserJsPlumbInstance, EVENT_DRAG_STOP, newInstance } from '@jsplumb/community';
 import type { DragStopEventParams } from '@jsplumb/community/types/browser-ui/drag-manager';
@@ -67,6 +67,7 @@ const useJsPlumbCanvas = <TNodeData, TConnectionData>({
   onLinkDetachedRef,
   onNodePositionChangeRef
 }: UseJsPlumbCanvasOptions<TNodeData, TConnectionData>) => {
+  const [instance, setInstance] = useState<BrowserJsPlumbInstance | null>(null);
   const endpointMapRef = useRef(new Map<string, Endpoint>());
   const connectionMapRef = useRef(new Map<string, Connection>());
   const syncingRef = useRef(false);
@@ -181,6 +182,7 @@ const useJsPlumbCanvas = <TNodeData, TConnectionData>({
       dragOptions: { cursor: 'move' }
     });
     instanceRef.current = instance;
+    setInstance(instance);
     const jp = instance as unknown as {
       bind?: (event: string, handler: (...args: any[]) => void) => void;
       deleteConnection?: (connection: Connection, params?: any) => void;
@@ -229,13 +231,13 @@ const useJsPlumbCanvas = <TNodeData, TConnectionData>({
     return () => {
       instance.destroy();
       instanceRef.current = null;
+      setInstance(null);
       endpointMapRef.current.clear();
       connectionMapRef.current.clear();
     };
   }, [graphRef, onLinkCreateRef, onLinkDetachedRef, onNodePositionChangeRef, readonly]);
 
   useEffect(() => {
-    const instance = instanceRef.current;
     if (!instance) {
       return;
     }
@@ -250,10 +252,9 @@ const useJsPlumbCanvas = <TNodeData, TConnectionData>({
         jp.setDraggable?.(element, !(readonly || node.disableDrag));
       }
     });
-  }, [nodeRefs, nodes, readonly]);
+  }, [instance, nodeRefs, nodes, readonly]);
 
   useLayoutEffect(() => {
-    const instance = instanceRef.current;
     if (!instance || !graphRef.current) {
       return;
     }
@@ -296,10 +297,9 @@ const useJsPlumbCanvas = <TNodeData, TConnectionData>({
     } finally {
       syncingRef.current = false;
     }
-  }, [graphRef, nodeRefs, nodes, readonly]);
+  }, [graphRef, instance, nodeRefs, nodes, readonly]);
 
   const synchronizeEndpoints = useCallback(() => {
-    const instance = instanceRef.current;
     if (!instance) {
       return;
     }
@@ -347,14 +347,13 @@ const useJsPlumbCanvas = <TNodeData, TConnectionData>({
     });
 
     endpointMapRef.current = nextEndpoints;
-  }, [instanceRef, nodeRefs, nodes, portRefs]);
+  }, [instance, nodeRefs, nodes, portRefs]);
 
   useLayoutEffect(() => {
     synchronizeEndpoints();
   }, [synchronizeEndpoints]);
 
   useLayoutEffect(() => {
-    const instance = instanceRef.current;
     if (!instance) {
       return;
     }
@@ -433,7 +432,7 @@ const useJsPlumbCanvas = <TNodeData, TConnectionData>({
     } finally {
       syncingRef.current = false;
     }
-  }, [attachConnectionHandlers, connections, ensureDeleteOverlay, instanceRef, updateConnectionMetadata]);
+  }, [attachConnectionHandlers, connections, ensureDeleteOverlay, instance, updateConnectionMetadata]);
 
   useEffect(() => {
     connectionMapRef.current.forEach((connection, id) => {
