@@ -1,0 +1,38 @@
+{
+  "name": "jsplumb-react-wrapper",
+  "version": "0.1.0",
+  "description": "React + TypeScript wrapper around the @jsplumb/community library for interactive node graphs.",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && vite build",
+    "dev": "vite"
+  },
+  "keywords": [
+    "jsplumb",
+    "react",
+    "graph",
+    "diagram"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "typescript": "^5.2.0",
+    "vite": "^4.4.0"
+  },
+  "dependencies": {
+    "@jsplumb/community": "^4.0.0-RC47",
+    "@jsplumb/core": "^4.0.0-RC47"
+  }
+}
